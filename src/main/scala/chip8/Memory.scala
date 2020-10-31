@@ -3,7 +3,8 @@ package chip8
 class Memory(program: Array[Byte],   programStart: Int = 0x200){
 
     private val memory: Array[Byte] = Array.ofDim(4096)
-
+    
+    val maxProgramSize  = 3584
     
     def loadProgram() = program.zipWithIndex.foreach{case (byte, idx) => set(idx + programStart, byte)}
 
@@ -26,8 +27,10 @@ class Memory(program: Array[Byte],   programStart: Int = 0x200){
 
 object Memory {
     def apply(program: Array[Byte]):  Memory = {
+        if(program.length > 3584){
+            throw new IllegalArgumentException(s"Invalid progam of size ${program.length} Bytes but the maximal size is 3584 Bytes")
+        }
         val m = new Memory(program)
-        println("load")
         m.loadProgram()
         m
     }

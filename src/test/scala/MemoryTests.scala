@@ -4,7 +4,7 @@ import scala.language.implicitConversions
 object MemoryTests extends TestSuite{
     val tests = Tests{
         val memory = Memory(Array(0x12, 0xEA, 0xCE ,0xAA).map(_.toByte))
-       
+        
         test("Memory get"){
             val v = memory.get(0x200)
             val v2 = memory.get(0x201)
@@ -19,6 +19,16 @@ object MemoryTests extends TestSuite{
             val v2  = memory.getWord(0x202)
             assert(v ==0x12EA.toShort)
             assert(v2== 0xCEAA.toShort)
+        }
+
+        test("Out of bounds program size throws exception"){
+            val e = intercept[IllegalArgumentException]{
+                Memory(Array.ofDim(3585))
+            }
+        }
+
+        test("Correct initialization with maximum program size"){
+            Memory(Array.ofDim(3584))
         }
     }
 }

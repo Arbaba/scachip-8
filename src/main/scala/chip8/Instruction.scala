@@ -178,10 +178,8 @@ The interpreter copies the values of registers V0 through Vx into memory, starti
 */
 case class LDIVx(vx: Byte) extends Instruction
 /*
-
 Fx65 - 
 Read registers V0 through Vx from memory starting at location I.
-
 The interpreter reads values from memory starting at location I into registers V0 through Vx.
 */
 case class LDVxI(vx: Byte) extends Instruction

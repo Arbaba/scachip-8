@@ -14,5 +14,5 @@ class Chip8(programPath: String){
 }
 
 object Chip8{
-    def apply(programPath: String = "roms/pong2.ch8"): Chip8 = new Chip8(programPath)
+    def apply(programPath: String = "resources/roms/pong2.ch8"): Chip8 = new Chip8(programPath)
 }
