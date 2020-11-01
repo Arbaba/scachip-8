@@ -11,14 +11,20 @@ class RegisterFile{
 
     private var sound: Byte  = 0
 
+    def validIndex(i: Int) = i >= 0 && i <= 15
+    def getVx(idx: Int): Int = {
+        require(validIndex(idx))
+        registers(idx) & 0xFF
+    }
+    def setVx(idx: Int, v: Byte): Unit = {
+        require(validIndex(idx))
+        registers.update(idx, v)
+    }
+    def getI(): Int = I & 0xFFFF
 
-    def getVx(idx: Int): Byte = registers(idx)
-
-    def setVx(idx: Int, v: Byte): Unit = registers.update(idx, v)
-
-    def getI(): Short = I
-
-    def setI(v: Byte):Unit  = I = v
+    def setI(v: Short):Unit  = {
+        I = v
+    }
 
     
 }

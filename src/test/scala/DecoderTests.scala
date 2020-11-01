@@ -24,7 +24,7 @@ object DecoderTests extends TestSuite{
                 val newOpCode = opcode.replace(needle, (x + y + n))
                 (newOpCode, newInstruction)
               case Some(needle@"xkk") => 
-                val (x, kk )= (rand(1), rand(1))
+                val (x, kk )= (rand(1), rand(2))
                 val newInstruction = instruction.replace("(", s"(${Integer.parseInt(x,16)},${Integer.parseInt(kk,16)}")
                 val newOpCode = opcode.replace(needle, x + kk)
                 (newOpCode, newInstruction)

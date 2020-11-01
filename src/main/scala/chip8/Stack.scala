@@ -6,8 +6,8 @@ class Stack{
     private val stack: Array[Byte] = Array.ofDim(16)
 
     def pushStack(v: Byte): Unit = {
-            if(SP >= 16){
-                throw new IllegalStateException("StackOverflow")
+            if(SP >= 15){
+                throw new StackOverflowError("StackOverflow")
             }
             SP += 1
 
