@@ -5,20 +5,20 @@ object RegisterFileTest extends TestSuite{
   val tests = Tests{
     test("Invalid get index throws exception"){
         val registers = RegisterFile()
-        intercept[IllegalArgumentException]{
+         val e1 = intercept[IllegalArgumentException]{
             registers.getVx(16)
         }
-        intercept[IllegalArgumentException]{
+         val e2 = intercept[IllegalArgumentException]{
             registers.getVx(-1)
         }
     }
 
     test("Invalid set index throws exception"){
         val registers = RegisterFile()
-        intercept[IllegalArgumentException]{
+         val e1 = intercept[IllegalArgumentException]{
             registers.setVx(-1, 1)
         }
-        intercept[IllegalArgumentException]{
+        val e2 = intercept[IllegalArgumentException]{
             registers.setVx(16, 1)
         }
     }
@@ -30,6 +30,10 @@ object RegisterFileTest extends TestSuite{
             assertMatch(registers.getVx(i) & 0xFF){
                 case i=>
             }
+        }
+        registers.setVx(0, 255)
+        assertMatch(registers.getVx(0) & 0xFF){
+            case 255=>
         }
     }
 

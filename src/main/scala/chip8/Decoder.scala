@@ -66,11 +66,11 @@ object Decoder{
     
     def getNNN(i: Int): Int = i & 0xFFF
     
-    def getX(i:Int): Byte = (((i & 0x0F00) >> 8) & 0xFF).toByte
+    def getX(i:Int): Int = (((i & 0x0F00) >> 8) & 0xFF)
     
-    def getY(i: Int): Byte = (((i & 0x00F0) >> 4) & 0xFF).toByte
+    def getY(i: Int): Int = (((i & 0x00F0) >> 4) & 0xFF)
 
-    def getKK(i: Int): Byte= (i & 0x00FF).toByte 
+    def getKK(i: Int): Int= (i & 0x00FF)
 
-    def getN(i: Int): Byte = (i & 0x000F).toByte
+    def getN(i: Int): Int = (i & 0x000F)
 }

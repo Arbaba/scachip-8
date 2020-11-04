@@ -3,19 +3,19 @@ package chip8
 class Stack{
     private var SP: Int = -1
 
-    private val stack: Array[Byte] = Array.ofDim(16)
+    private val stack: Array[Short] = Array.ofDim(16)
 
-    def pushStack(v: Byte): Unit = {
+    def pushStack(v: Int): Unit = {
             if(SP >= 15){
                 throw new StackOverflowError("StackOverflow")
             }
             SP += 1
 
-            stack.update(SP, v)
+            stack.update(SP, v.toShort)
     }
         
-    def popStack(): Byte = {
-        if(SP <= 0){
+    def popStack(): Int = {
+        if(SP < 0){
             throw new IllegalStateException("StackUnderflow")
         }
         val v = stack(SP)

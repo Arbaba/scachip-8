@@ -7,23 +7,24 @@ class RegisterFile{
     //Memory addresses storage. Only 12 lowest bits are used
     private var I: Short = 0
 
-    private var delay: Byte = 0
-
-    private var sound: Byte  = 0
-
+    
     def validIndex(i: Int) = i >= 0 && i <= 15
     def getVx(idx: Int): Int = {
         require(validIndex(idx))
         registers(idx) & 0xFF
     }
-    def setVx(idx: Int, v: Byte): Unit = {
+    def getVx(idx: Byte): Int = {
+        getVx(idx & 0xFF)
+    }
+
+    def setVx(idx: Int, v: Int): Unit = {
         require(validIndex(idx))
-        registers.update(idx, v)
+        registers.update(idx, v.toByte)    
     }
     def getI(): Int = I & 0xFFFF
 
-    def setI(v: Short):Unit  = {
-        I = v
+    def setI(v: Int):Unit  = {
+        I = v.toShort
     }
 
     
