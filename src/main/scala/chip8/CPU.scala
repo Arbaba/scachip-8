@@ -1,22 +1,47 @@
 package chip8
 
 import scala.util.Random
+import scala.collection.mutable
+
+import scalafx.scene.input.KeyCode 
+
 
 class CPU(memory: Memory, display: Display){
     val registerFile: RegisterFile = RegisterFile()
     val stack: Stack = Stack()
     private var pc: Int = 0x200
-    private val pressed: Array[Boolean] = Array.ofDim(16)
-    private var delay: Int = 0
+     val pressed: mutable.Map[Int, Boolean] = mutable.Map.empty
+    private val keyCodeConverter: Map[KeyCode, Int] = Map(
+      KeyCode.S -> 0,
 
+      KeyCode.UP -> 8,
+      KeyCode.DOWN -> 2,
+      KeyCode.LEFT -> 4,
+      KeyCode.RIGHT -> 6,
+      KeyCode.Q -> 1,
+      KeyCode.W -> 3,
+      KeyCode.E -> 5,
+      KeyCode.A -> 9,
+      KeyCode.T -> 10,
+      KeyCode.Z -> 11,
+      KeyCode.U -> 12,
+      KeyCode.I -> 13,
+      KeyCode.O -> 14,
+      KeyCode.P -> 15,
+      KeyCode.D -> 7,
+
+      )
+
+    var delay: Int = 0
+    private var vxKey = 0
     private var sound: Int  = 0
     val V = registerFile
-    def run() = {
-     for(i <- 0 to 200){
-        //println(decode(fetch))
+    var waiting = false
+    def cycle() =  {
+      if(!waiting){
         execute(decode(fetch))
       }
-    }
+    } 
 
     def fetch: Int =  {
       val instruction = memory.getWord(pc)
@@ -30,8 +55,25 @@ class CPU(memory: Memory, display: Display){
       //println(d)
       d
     }
+    
+    def handlePress(keyCode: KeyCode) = {
+      println("pressed")
+      if(keyCodeConverter.keySet.contains(keyCode)){
+        pressed(keyCodeConverter(keyCode)) = true
+      //if(waiting)
+        registerFile.setVx(vxKey,keyCodeConverter(keyCode))
+        waiting = false
+      }
+    }
+
+    def handleRelease(keyCode: KeyCode){
+      println("released")
+      if(keyCodeConverter.keySet.contains(keyCode))
+        pressed(keyCodeConverter(keyCode)) = false
+    }
 
     def execute(instruction: Instruction): Unit = {
+      //println(instruction)
       def carry(b: Boolean) = if(b) registerFile.setVx(15.toByte, 1) else registerFile.setVx(15.toByte,0)
       instruction match {
         case CLS() =>
@@ -45,7 +87,6 @@ class CPU(memory: Memory, display: Display){
         case  SYS(address: Int) =>
           pc = address.toShort
         case  CALL(address: Int)  => 
-          //incrementPc()
           stack.pushStack(pc)
           pc = address.toShort
         case  SkipIfEq(regIdx: Int, value: Int)  => 
@@ -152,8 +193,7 @@ class CPU(memory: Memory, display: Display){
         */
         case  DRWVxVy(vx: Int, vy: Int, nibble : Int)  =>
           val location = registerFile.getI()
-          println(location)
-          val collision = display.draw(registerFile.getVx(vx), registerFile.getVx(vy), for(i <- location until location + nibble) yield memory.get(i))
+          val collision = display.bufferDrawing(registerFile.getVx(vx), registerFile.getVx(vy), for(i <- location until location + nibble) yield memory.get(i))
           carry(collision)
           /*
         Ex9E -
@@ -162,7 +202,11 @@ class CPU(memory: Memory, display: Display){
         Checks the keyboard, and if the key corresponding to the value of Vx is currently in the down position, PC is increased by 2.
         */
         case  SKPVx(vx: Int)  =>
-          if(pressed(vx)) incrementPc()
+          
+          pressed.get(registerFile.getVx(vx)) match {
+            case Some(true)  => incrementPc()
+            case _ => 
+          }
 
         /*
         ExA1 - 
@@ -171,8 +215,10 @@ class CPU(memory: Memory, display: Display){
         Checks the keyboard, and if the key corresponding to the value of Vx is currently in the up position, PC is increased by 2.
         */
         case  SKNPVx(vx: Int)  =>
-          if(!pressed(vx)) incrementPc()
-
+          pressed.get(registerFile.getVx(vx)) match {
+            case Some(false) | None => incrementPc()
+            case _ => 
+          }
         /*
         Fx07 - 
         Set Vx = delay timer value.
@@ -188,8 +234,9 @@ class CPU(memory: Memory, display: Display){
         All execution stops until a key is pressed, then the value of that key is stored in Vx.
         */
         case  LDVxK(vx: Int)  => 
-          registerFile.setVx(vx, display.waitKey())
-          
+          waiting = true
+          vxKey = vx
+          println(waiting)
 
         /*
         Fx15 - 
@@ -235,7 +282,6 @@ class CPU(memory: Memory, display: Display){
           memory.set(registerFile.getI() + 1, ((registerFile.getVx(vx) / 10) % 10).toByte)
           memory.set(registerFile.getI() + 2, (registerFile.getVx(vx) % 10).toByte)
 
-
         /*
         Fx55 - 
         Store registers V0 through Vx in memory starting at location I.
@@ -247,12 +293,10 @@ class CPU(memory: Memory, display: Display){
             memory.set(registerFile.getI() + i, registerFile.getVx(i).toByte)
           }
         /*
-
-        Fx65 - 
-        Read registers V0 through Vx from memory starting at location I.
-
-        The interpreter reads values from memory starting at location I into registers V0 through Vx.
-        */
+         * Fx65 - 
+         * Read registers V0 through Vx from memory starting at location I.
+         *  The interpreter reads values from memory starting at location I into registers V0 through Vx.
+         */
         case  LDVxI(vx: Int)  =>
           for(i <-0  to  vx){
             registerFile.setVx(i, memory.get(registerFile.getI() + i))
